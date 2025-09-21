@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CA Aspirant's Interactive Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Chosen Palette: Warm & Welcoming -->
+    <!-- Application Structure Plan: The application is designed as an interactive dashboard with four main sections, accessible via a sticky navigation bar for easy, non-linear exploration. 1) Dashboard: A central hub for a high-level overview, featuring interactive cards for core skills and a dynamic weekly planner with sliders to personalize time allocation. This structure immediately engages the user and makes the information actionable. 2) Skill Deep Dive: A dynamic content area where users can explore detailed strategies for each core skill, activated by the dashboard cards. This creates a seamless flow from overview to detail. 3) Action Plan: A tabbed interface breaking the 6-month timeline into manageable periods, preventing information overload. 4) Resources: A filterable library for quick access to specific tools. This user-centric, task-oriented design was chosen to transform static advice into a personalized, interactive planning tool that directly addresses the student's needs for focus and clear direction. -->
+    <!-- Visualization & Content Choices: Report Info -> Goal -> Viz/Presentation -> Interaction -> Justification -> Library/Method. 1) Employer Skill Importance -> Compare -> Bar/Radar Chart -> Dropdown to toggle chart type -> Allows data exploration from multiple perspectives -> Chart.js (Canvas). 2) Weekly Time Allocation -> Personalize -> Donut Chart with Sliders -> User input instantly updates the chart -> Turns a generic suggestion into a personal planning tool -> Chart.js (Canvas) + JS. 3) 6-Month Plan -> Organize (Process) -> Tabbed Timeline -> Clicking tabs reveals specific stages -> Breaks down a long plan into digestible steps, improving usability -> HTML/CSS + JS. 4) Resource List -> Organize/Find -> Filterable Cards -> Buttons hide/show resources by category -> Enables users to find relevant information quickly -> HTML/CSS + JS. CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #faf3e0;
+        color: #333333;
+      }
+      .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+        height: 350px;
+        max-height: 400px;
+      }
+      .nav-link {
+        transition: color 0.3s, border-bottom-color 0.3s;
+      }
+      .nav-link.active {
+        color: #b2a4ff;
+        border-bottom-color: #b2a4ff;
+      }
+      .skill-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .skill-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+      .tab-btn.active {
+        background-color: #b2a4ff;
+        color: white;
+      }
+      .filter-btn.active {
+        background-color: #b2a4ff;
+        color: white;
+        border-color: #b2a4ff;
+      }
+      [x-cloak] {
+        display: none;
+      }
+    </style>
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+      defer
+    ></script>
+  </head>
+  <body x-data="{ activeTab: 'months1-2', activeResourceFilter: 'all' }">
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-md">
+      <nav
+        class="container mx-auto px-6 py-4 flex justify-between items-center"
+      >
+        <h1 class="text-xl font-bold text-[#B2A4FF]">
+          CA Aspirant's Dashboard
+        </h1>
+        <div class="hidden md:flex space-x-8">
+          <a
+            href="#dashboard"
+            class="nav-link pb-1 border-b-2 border-transparent hover:text-[#B2A4FF] hover:border-[#B2A4FF]"
+            >Dashboard</a
+          >
+          <a
+            href="#deep-dive"
+            class="nav-link pb-1 border-b-2 border-transparent hover:text-[#B2A4FF] hover:border-[#B2A4FF]"
+            >Skill Deep Dive</a
+          >
+          <a
+            href="#action-plan"
+            class="nav-link pb-1 border-b-2 border-transparent hover:text-[#B2A4FF] hover:border-[#B2A4FF]"
+            >Action Plan</a
+          >
+          <a
+            href="#resources"
+            class="nav-link pb-1 border-b-2 border-transparent hover:text-[#B2A4FF] hover:border-[#B2A4FF]"
+            >Resources</a
+          >
+        </div>
+      </nav>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+      <section id="dashboard" class="mb-16 scroll-mt-24">
+        <div class="text-center mb-12">
+          <h2 class="text-4xl font-bold text-[#333333] mb-2">
+            Welcome, Future CA!
+          </h2>
+          <p class="text-lg text-gray-600">
+            This dashboard is your personal tool to build essential skills
+            alongside your studies.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <a
+            href="#deep-dive"
+            class="skill-card bg-white rounded-lg shadow-lg p-6 text-center cursor-pointer"
+          >
+            <h3 class="text-2xl font-bold text-[#B2A4FF]">
+              Communication Mastery
+            </h3>
+            <p class="mt-2 text-gray-600">
+              Build trust and clarity. Learn to explain complex financial data
+              effectively.
+            </p>
+          </a>
+          <a
+            href="#deep-dive"
+            class="skill-card bg-white rounded-lg shadow-lg p-6 text-center cursor-pointer"
+          >
+            <h3 class="text-2xl font-bold text-[#B2A4FF]">Digital Acumen</h3>
+            <p class="mt-2 text-gray-600">
+              Master modern finance tools, from Excel to accounting software.
+            </p>
+          </a>
+          <a
+            href="#deep-dive"
+            class="skill-card bg-white rounded-lg shadow-lg p-6 text-center cursor-pointer"
+          >
+            <h3 class="text-2xl font-bold text-[#B2A4FF]">
+              Personal Effectiveness
+            </h3>
+            <p class="mt-2 text-gray-600">
+              Develop focus, manage time, and build the discipline for success.
+            </p>
+          </a>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-xl font-bold text-[#333333]">
+                Key Skills Employers Value
+              </h3>
+              <select
+                id="chartTypeSelector"
+                class="border rounded-md px-2 py-1"
+              >
+                <option value="bar">Bar Chart</option>
+                <option value="radar">Radar Chart</option>
+              </select>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">
+              This chart shows the professional skills employers prioritize
+              beyond technical knowledge. Use the dropdown to see the data in
+              different formats for a complete picture.
+            </p>
+            <div class="chart-container">
+              <canvas id="skillsChart"></canvas>
+            </div>
+          </div>
+
+          <div
+            class="bg-white rounded-lg shadow-lg p-6"
+            x-data="{ study: 70, skills: 20, network: 10, total: 100 }"
+          >
+            <h3 class="text-xl font-bold text-[#333333] mb-2">
+              Interactive Weekly Planner
+            </h3>
+            <p class="text-sm text-gray-600 mb-4">
+              Adjust the sliders to personalize your weekly time allocation. The
+              chart will update in real-time to reflect your plan.
+            </p>
+            <div class="space-y-4 mb-4">
+              <div>
+                <label class="block text-gray-700"
+                  >CA Studies: <span x-text="study"></span>%</label
+                >
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  x-model.number="study"
+                  @input="updateDonutChart(study, skills, network)"
+                  class="w-full"
+                />
+              </div>
+              <div>
+                <label class="block text-gray-700"
+                  >Skill Development: <span x-text="skills"></span>%</label
+                >
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  x-model.number="skills"
+                  @input="updateDonutChart(study, skills, network)"
+                  class="w-full"
+                />
+              </div>
+              <div>
+                <label class="block text-gray-700"
+                  >Networking: <span x-text="network"></span>%</label
+                >
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  x-model.number="network"
+                  @input="updateDonutChart(study, skills, network)"
+                  class="w-full"
+                />
+              </div>
+            </div>
+            <div class="chart-container h-64 max-h-64">
+              <canvas id="timeAllocationChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="deep-dive"
+        class="mb-16 scroll-mt-24"
+        x-data="{ activeSkill: 'communication' }"
+      >
+        <div class="text-center mb-12">
+          <h2 class="text-4xl font-bold text-[#333333] mb-2">
+            Skill Deep Dive
+          </h2>
+          <p class="text-lg text-gray-600">
+            Select a skill to explore actionable steps and track your progress.
+          </p>
+          <div class="mt-4 flex justify-center space-x-2">
+            <button
+              @click="activeSkill = 'communication'"
+              :class="{'bg-[#B2A4FF] text-white': activeSkill === 'communication', 'bg-white text-gray-700': activeSkill !== 'communication'}"
+              class="px-4 py-2 rounded-lg shadow transition"
+            >
+              Communication
+            </button>
+            <button
+              @click="activeSkill = 'digital'"
+              :class="{'bg-[#B2A4FF] text-white': activeSkill === 'digital', 'bg-white text-gray-700': activeSkill !== 'digital'}"
+              class="px-4 py-2 rounded-lg shadow transition"
+            >
+              Digital Acumen
+            </button>
+            <button
+              @click="activeSkill = 'effectiveness'"
+              :class="{'bg-[#B2A4FF] text-white': activeSkill === 'effectiveness', 'bg-white text-gray-700': activeSkill !== 'effectiveness'}"
+              class="px-4 py-2 rounded-lg shadow transition"
+            >
+              Effectiveness
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-lg p-6">
+          <div x-show="activeSkill === 'communication'" x-cloak>
+            <h3 class="text-2xl font-bold text-[#B2A4FF] mb-4">
+              Mastering Communication
+            </h3>
+            <p class="mb-6">
+              Effective communication is the bridge between financial complexity
+              and client understanding. It involves clear speaking, concise
+              writing, and active listening. Use this checklist to track your
+              development.
+            </p>
+            <ul class="space-y-3">
+              <li class="flex items-center">
+                <input type="checkbox" class="h-5 w-5 rounded mr-3" /><label
+                  >Join a local Toastmasters club in Delhi.</label
+                >
+              </li>
+              <li class="flex items-center">
+                <input type="checkbox" class="h-5 w-5 rounded mr-3" /><label
+                  >Volunteer to explain a topic to your study group
+                  weekly.</label
+                >
+              </li>
+              <li class="flex items-center">
+                <input type="checkbox" class="h-5 w-5 rounded mr-3" /><label
+                  >Write short summaries of finance news on LinkedIn.</label
+                >
+              </li>
+              <li class="flex items-center">
+                <input type="checkbox" class="h-5 w-5 rounded mr-3" /><label
+                  >Practice active listening in conversations without
+                  interrupting.</label
+                >
+              </li>
+            </ul>
+          </div>
+          <div x-show="activeSkill === 'digital'" x-cloak>
+            <h3 class="text-2xl font-bold text-[#B2A4FF] mb-4">
+              Building Digital Acumen
+            </h3>
+            <p class="mb-6">
+              The modern financial world is digital. Proficiency with essential
+              software is non-negotiable and provides practical exposure beyond
+              theory. Check off these milestones as you complete them.
+            </p>
+            <ul class="space-y-3">
+              <li class="flex items-center">
+                <input type="checkbox" class="h-5 w-5 rounded mr-3" /><label
+                  >Master Advanced Excel (VLOOKUP, PivotTables,
+                  INDEX-MATCH).</label
+                >
+              </li>
+              <li class="flex items-center">
+                <input type="checkbox" class="h-5 w-5 rounded mr-3" /><label
+                  >Complete a beginner's course in Tally Prime or
+                  QuickBooks.</label
+                >
+              </li>
+              <li class="flex items-center">
+                <input type="checkbox" class="h-5 w-5 rounded mr-3" /><label
+                  >Explore a data visualization tool like Microsoft Power
+                  BI.</label
+                >
+              </li>
+              <li class="flex items-center">
+                <input type="checkbox" class="h-5 w-5 rounded mr-3" /><label
+                  >Understand the basics of cloud accounting platforms.</label
+                >
+              </li>
+            </ul>
+          </div>
+          <div x-show="activeSkill === 'effectiveness'" x-cloak>
+            <h3 class="text-2xl font-bold text-[#B2A4FF] mb-4">
+              Enhancing Personal Effectiveness
+            </h3>
+            <p class="mb-6">
+              The CA journey demands focus and resilience. Mastering
+              productivity techniques will help you manage the vast syllabus and
+              avoid burnout. Track your adoption of these powerful habits.
+            </p>
+            <ul class="space-y-3">
+              <li class="flex items-center">
+                <input type="checkbox" class="h-5 w-5 rounded mr-3" /><label
+                  >Use the Pomodoro Technique for focused study sessions.</label
+                >
+              </li>
+              <li class="flex items-center">
+                <input type="checkbox" class="h-5 w-5 rounded mr-3" /><label
+                  >Use a digital tool (Trello, Notion) to plan your week.</label
+                >
+              </li>
+              <li class="flex items-center">
+                <input type="checkbox" class="h-5 w-5 rounded mr-3" /><label
+                  >Conduct a monthly review of your study goals and
+                  progress.</label
+                >
+              </li>
+              <li class="flex items-center">
+                <input type="checkbox" class="h-5 w-5 rounded mr-3" /><label
+                  >Schedule dedicated time for rest and hobbies to prevent
+                  burnout.</label
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="action-plan" class="mb-16 scroll-mt-24">
+        <div class="text-center mb-12">
+          <h2 class="text-4xl font-bold text-[#333333] mb-2">
+            Your 6-Month Action Plan
+          </h2>
+          <p class="text-lg text-gray-600">
+            Follow this structured path for steady progress. Select a timeframe
+            to see your goals.
+          </p>
+        </div>
+        <div class="w-full max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-6">
+          <div class="flex border-b mb-6">
+            <button
+              @click="activeTab = 'months1-2'"
+              :class="{ 'active': activeTab === 'months1-2' }"
+              class="tab-btn flex-1 text-center py-2 px-4 transition duration-300"
+            >
+              Months 1-2
+            </button>
+            <button
+              @click="activeTab = 'months3-4'"
+              :class="{ 'active': activeTab === 'months3-4' }"
+              class="tab-btn flex-1 text-center py-2 px-4 transition duration-300"
+            >
+              Months 3-4
+            </button>
+            <button
+              @click="activeTab = 'months5-6'"
+              :class="{ 'active': activeTab === 'months5-6' }"
+              class="tab-btn flex-1 text-center py-2 px-4 transition duration-300"
+            >
+              Months 5-6
+            </button>
+          </div>
+          <div x-show="activeTab === 'months1-2'" x-cloak>
+            <h3 class="font-bold text-xl mb-4 text-[#B2A4FF]">
+              Phase 1: Foundational Focus
+            </h3>
+            <ul class="list-disc list-inside space-y-2 text-gray-700">
+              <li>
+                <strong>Communication:</strong> Join a Toastmasters club. Goal:
+                Attend 4 meetings.
+              </li>
+              <li>
+                <strong>Digital:</strong> Master Advanced Excel functions via
+                YouTube.
+              </li>
+              <li>
+                <strong>Effectiveness:</strong> Use the Pomodoro Technique for
+                your toughest subject.
+              </li>
+            </ul>
+          </div>
+          <div x-show="activeTab === 'months3-4'" x-cloak>
+            <h3 class="font-bold text-xl mb-4 text-[#B2A4FF]">
+              Phase 2: Intermediate Application
+            </h3>
+            <ul class="list-disc list-inside space-y-2 text-gray-700">
+              <li>
+                <strong>Communication:</strong> Explain a complex topic to your
+                study group weekly.
+              </li>
+              <li>
+                <strong>Digital:</strong> Complete a free online beginner's
+                course in Tally Prime.
+              </li>
+              <li>
+                <strong>Effectiveness:</strong> Use Trello or Notion to map out
+                your weekly study plan.
+              </li>
+            </ul>
+          </div>
+          <div x-show="activeTab === 'months5-6'" x-cloak>
+            <h3 class="font-bold text-xl mb-4 text-[#B2A4FF]">
+              Phase 3: Advanced Integration
+            </h3>
+            <ul class="list-disc list-inside space-y-2 text-gray-700">
+              <li>
+                <strong>Communication:</strong> Write short finance news
+                summaries on LinkedIn.
+              </li>
+              <li>
+                <strong>Digital:</strong> Explore a 'Getting Started' module for
+                Microsoft Power BI.
+              </li>
+              <li>
+                <strong>Effectiveness:</strong> Conduct a monthly review of your
+                goals and adjust your strategy.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="resources" class="scroll-mt-24">
+        <div class="text-center mb-12">
+          <h2 class="text-4xl font-bold text-[#333333] mb-2">
+            Curated Resource Library
+          </h2>
+          <p class="text-lg text-gray-600">
+            Find tools and platforms to accelerate your learning. Use the
+            filters to find what you need.
+          </p>
+        </div>
+        <div class="flex justify-center space-x-2 mb-8">
+          <button
+            @click="activeResourceFilter = 'all'"
+            :class="{'active': activeResourceFilter === 'all'}"
+            class="filter-btn px-4 py-2 border rounded-lg transition"
+          >
+            All
+          </button>
+          <button
+            @click="activeResourceFilter = 'comm'"
+            :class="{'active': activeResourceFilter === 'comm'}"
+            class="filter-btn px-4 py-2 border rounded-lg transition"
+          >
+            Communication
+          </button>
+          <button
+            @click="activeResourceFilter = 'digi'"
+            :class="{'active': activeResourceFilter === 'digi'}"
+            class="filter-btn px-4 py-2 border rounded-lg transition"
+          >
+            Digital
+          </button>
+          <button
+            @click="activeResourceFilter = 'effc'"
+            :class="{'active': activeResourceFilter === 'effc'}"
+            class="filter-btn px-4 py-2 border rounded-lg transition"
+          >
+            Effectiveness
+          </button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div
+            class="resource-card bg-white rounded-lg shadow-lg p-6"
+            data-category="comm"
+            x-show="activeResourceFilter === 'all' || activeResourceFilter === 'comm'"
+            x-transition
+          >
+            <h3 class="text-xl font-bold text-[#B2A4FF] mb-3">Communication</h3>
+            <ul class="list-disc list-inside text-gray-600">
+              <li>Toastmasters International</li>
+              <li>Coursera: Communication Courses</li>
+              <li>LinkedIn Learning</li>
+            </ul>
+          </div>
+          <div
+            class="resource-card bg-white rounded-lg shadow-lg p-6"
+            data-category="digi"
+            x-show="activeResourceFilter === 'all' || activeResourceFilter === 'digi'"
+            x-transition
+          >
+            <h3 class="text-xl font-bold text-[#B2A4FF] mb-3">
+              Digital Skills
+            </h3>
+            <ul class="list-disc list-inside text-gray-600">
+              <li>Microsoft Excel Tutorials</li>
+              <li>Udemy / Coursera for Tally</li>
+              <li>Microsoft Learn for Power BI</li>
+            </ul>
+          </div>
+          <div
+            class="resource-card bg-white rounded-lg shadow-lg p-6"
+            data-category="effc"
+            x-show="activeResourceFilter === 'all' || activeResourceFilter === 'effc'"
+            x-transition
+          >
+            <h3 class="text-xl font-bold text-[#B2A4FF] mb-3">
+              Focus & Productivity
+            </h3>
+            <ul class="list-disc list-inside text-gray-600">
+              <li>Trello / Notion</li>
+              <li>Book: "Deep Work" by Cal Newport</li>
+              <li>Forest App (Pomodoro)</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      let skillsChart, timeAllocationChart;
+      const chartData = {
+        labels: [
+          "Communication",
+          "Teamwork",
+          "Problem Solving",
+          "Adaptability",
+        ],
+        datasets: [
+          {
+            label: "Importance to Employers (%)",
+            data: [85, 78, 75, 72],
+            backgroundColor: ["#B2A4FF", "#FFDEB4", "#F875AA", "#B2A4FF"],
+            borderColor: "#B2A4FF",
+            borderWidth: 1,
+            pointBackgroundColor: "#B2A4FF",
+            pointBorderColor: "#fff",
+            pointHoverBackgroundColor: "#fff",
+            pointHoverBorderColor: "#B2A4FF",
+          },
+        ],
+      };
+
+      const commonOptions = {
+        maintainAspectRatio: false,
+        responsive: true,
+        plugins: {
+          legend: { labels: { color: "#333333" } },
+          tooltip: {
+            callbacks: { title: (tooltipItems) => tooltipItems[0].label },
+          },
+        },
+      };
+
+      function createChart(type) {
+        const ctx = document.getElementById("skillsChart").getContext("2d");
+        if (skillsChart) {
+          skillsChart.destroy();
+        }
+
+        let options = { ...commonOptions };
+        if (type === "radar") {
+          options.scales = {
+            r: {
+              angleLines: { color: "#ddd" },
+              grid: { color: "#ddd" },
+              pointLabels: { color: "#333" },
+              suggestedMin: 0,
+              suggestedMax: 100,
+            },
+          };
+        } else {
+          options.scales = {
+            y: {
+              beginAtZero: true,
+              grid: { color: "#e2e8f0" },
+              ticks: { color: "#334155" },
+            },
+            x: { grid: { display: false }, ticks: { color: "#334155" } },
+          };
+          options.indexAxis = "y";
+        }
+
+        skillsChart = new Chart(ctx, {
+          type: type,
+          data: chartData,
+          options: options,
+        });
+      }
+
+      function createDonutChart(study, skills, network) {
+        const ctx = document
+          .getElementById("timeAllocationChart")
+          .getContext("2d");
+        timeAllocationChart = new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            labels: ["CA Studies", "Skill Development", "Networking"],
+            datasets: [
+              {
+                data: [study, skills, network],
+                backgroundColor: ["#B2A4FF", "#FFDEB4", "#F875AA"],
+                hoverOffset: 4,
+              },
+            ],
+          },
+          options: commonOptions,
+        });
+      }
+
+      function updateDonutChart(study, skills, network) {
+        timeAllocationChart.data.datasets[0].data = [study, skills, network];
+        timeAllocationChart.update();
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        createChart("bar");
+        createDonutChart(70, 20, 10);
+
+        document
+          .getElementById("chartTypeSelector")
+          .addEventListener("change", (e) => {
+            createChart(e.target.value);
+          });
+
+        const navLinks = document.querySelectorAll(".nav-link");
+        const sections = document.querySelectorAll("main section");
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                navLinks.forEach((link) => {
+                  link.classList.remove("active");
+                  if (
+                    link.getAttribute("href").substring(1) === entry.target.id
+                  ) {
+                    link.classList.add("active");
+                  }
+                });
+              }
+            });
+          },
+          { rootMargin: "-50% 0px -50% 0px" }
+        );
+
+        sections.forEach((section) => observer.observe(section));
+      });
+    </script>
+  </body>
+</html>

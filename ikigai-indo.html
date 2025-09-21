@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Infographic: Anatomy of a Future-Proof Career</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Chosen Palette: Brilliant Blues (#03045E, #0077B6, #00B4D8, #90E0EF, #CAF0F8) -->
+    <!-- Application Structure Plan: The SPA infographic is designed as a top-down narrative, guiding the user through a story of career synthesis. It starts with the abstract Ikigai concept, defines the user's four core skill pillars, then flows into a central 'Synergy' section where interactive charts visualize hybrid careers. This is followed by quantitative market data (demand, salary) and a concluding actionable timeline. A sticky navigation bar tracks scroll progress. This linear storytelling structure is ideal for an infographic format, making complex career analysis digestible and engaging. -->
+    <!-- Visualization & Content Choices: 
+        - Ikigai Concept: Goal(Organize) -> HTML/CSS Venn Diagram -> Justification: Intuitive visual metaphor for the core theme without SVG.
+        - Core Skills: Goal(Compare) -> Bar Chart -> Justification: Compares skill importance across foundational disciplines clearly. (Chart.js/Canvas)
+        - Hybrid Career Profiles: Goal(Compare) -> Radar Chart -> Justification: Best for showing multi-variable strengths of a single career path. Interactive on click for engagement. (Chart.js/Canvas)
+        - Market Demand Ranking: Goal(Compare/Organize) -> Ordered Bar Chart -> Justification: Ranks opportunities for quick assessment. (Chart.js/Canvas)
+        - Salary Comparison: Goal(Compare) -> Bar Chart -> Justification: Simple, direct comparison of earning potential. (Chart.js/Canvas)
+        - Action Plan: Goal(Organize) -> HTML/CSS Timeline -> Justification: Visually represents a process over time, fitting the infographic narrative.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f8fafc;
+      }
+      .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        height: 350px;
+        max-height: 400px;
+      }
+      @media (min-width: 768px) {
+        .chart-container {
+          height: 400px;
+        }
+      }
+      .nav-link.active {
+        color: #00b4d8;
+        font-weight: 700;
+      }
+      .stat-card {
+        background-color: white;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+        padding: 1.5rem;
+        text-align: center;
+      }
+      .text-main {
+        color: #03045e;
+      }
+      .text-accent {
+        color: #0077b6;
+      }
+      .bg-main {
+        background-color: #03045e;
+      }
+      .bg-lightest {
+        background-color: #caf0f8;
+      }
+      .border-accent {
+        border-color: #0077b6;
+      }
+      .career-card {
+        transition: all 0.2s ease-in-out;
+        border: 2px solid transparent;
+      }
+      .career-card.active {
+        border-color: #00b4d8;
+        transform: scale(1.03);
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+          0 4px 6px -2px rgb(0 0 0 / 0.1);
+      }
+    </style>
+  </head>
+  <body class="text-gray-700">
+    <nav class="sticky top-0 bg-white/80 backdrop-blur-md shadow-sm z-50">
+      <div class="container mx-auto px-4">
+        <div
+          class="flex justify-center items-center h-16 space-x-4 md:space-x-8 text-sm md:text-base font-medium"
+        >
+          <a href="#intro" class="nav-link text-gray-600 hover:text-accent"
+            >Intro</a
+          >
+          <a href="#pillars" class="nav-link text-gray-600 hover:text-accent"
+            >Pillars</a
+          >
+          <a href="#synergy" class="nav-link text-gray-600 hover:text-accent"
+            >Synergy</a
+          >
+          <a href="#market" class="nav-link text-gray-600 hover:text-accent"
+            >Market</a
+          >
+          <a href="#roadmap" class="nav-link text-gray-600 hover:text-accent"
+            >Roadmap</a
+          >
+        </div>
+      </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-12">
+      <section id="intro" class="text-center py-16 scroll-mt-20">
+        <h1 class="text-4xl md:text-6xl font-extrabold text-main">
+          The Anatomy of a Future-Proof Career
+        </h1>
+        <p class="mt-4 max-w-3xl mx-auto text-lg md:text-xl text-gray-600">
+          Analyzing the intersection of Technology, Finance, AI, and
+          Entrepreneurship to uncover high-impact career paths.
+        </p>
+        <div class="mt-12 stat-card max-w-4xl mx-auto">
+          <h2 class="text-2xl font-bold text-accent mb-4">
+            Finding Your Ikigai
+          </h2>
+          <p class="mb-6">
+            The Japanese concept of "a reason for being" is the ideal framework
+            for career planning. It's the synthesis of what you love, what
+            you're good at, what the world needs, and what you can be paid for.
+          </p>
+          <div
+            class="grid grid-cols-2 md:grid-cols-4 gap-4 text-white font-semibold"
+          >
+            <div class="p-4 rounded-lg bg-blue-500">💕 What you LOVE</div>
+            <div class="p-4 rounded-lg bg-green-500">
+              💪 What you're GOOD AT
+            </div>
+            <div class="p-4 rounded-lg bg-orange-500">
+              🌍 What the world NEEDS
+            </div>
+            <div class="p-4 rounded-lg bg-purple-500">
+              💰 What you can be PAID FOR
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="pillars" class="py-16 scroll-mt-20">
+        <h2 class="text-3xl md:text-4xl font-bold text-center text-main mb-4">
+          The Four Pillars of Your Expertise
+        </h2>
+        <p class="text-center max-w-3xl mx-auto text-lg text-gray-600 mb-12">
+          Your interests in these four distinct, high-demand fields form the
+          foundation. Understanding the core skills of each is the first step to
+          unlocking their combined potential.
+        </p>
+        <div class="stat-card">
+          <div class="chart-container h-96 md:h-[500px] max-h-[500px]">
+            <canvas id="pillarsChart"></canvas>
+          </div>
+          <p class="mt-4 text-sm text-gray-500">
+            This chart shows a simplified view of core skill sets. True
+            expertise requires deep, specialized knowledge in multiple areas
+            within each pillar.
+          </p>
+        </div>
+      </section>
+
+      <section id="synergy" class="py-16 scroll-mt-20">
+        <h2 class="text-3xl md:text-4xl font-bold text-center text-main mb-4">
+          Career Synergy: Where Pillars Converge
+        </h2>
+        <p class="text-center max-w-3xl mx-auto text-lg text-gray-600 mb-12">
+          True innovation lies at the intersection of disciplines. The most
+          valuable modern careers are not singular, but are hybrids that blend
+          these core pillars. Click on a card below to explore its unique skill
+          profile.
+        </p>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+          <div id="career-cards-container" class="space-y-4"></div>
+          <div>
+            <div class="stat-card">
+              <h3
+                id="radar-chart-title"
+                class="text-2xl font-bold text-accent mb-4"
+              ></h3>
+              <div class="chart-container">
+                <canvas id="synergyRadarChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="market" class="py-16 scroll-mt-20">
+        <h2 class="text-3xl md:text-4xl font-bold text-center text-main mb-4">
+          Market Opportunity Analysis
+        </h2>
+        <p class="text-center max-w-3xl mx-auto text-lg text-gray-600 mb-12">
+          Identifying a passion is the first step. Validating its demand and
+          earning potential is what makes it a viable career. This section
+          quantifies the opportunity for each hybrid role.
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="stat-card">
+            <h3 class="text-2xl font-bold text-accent mb-4">
+              Market Demand Score
+            </h3>
+            <div class="chart-container">
+              <canvas id="demandChart"></canvas>
+            </div>
+          </div>
+          <div class="stat-card">
+            <h3 class="text-2xl font-bold text-accent mb-4">
+              Salary Potential (USD, Annual)
+            </h3>
+            <div class="chart-container">
+              <canvas id="salaryChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="roadmap" class="py-16 scroll-mt-20">
+        <h2 class="text-3xl md:text-4xl font-bold text-center text-main mb-4">
+          Your Roadmap to Ikigai
+        </h2>
+        <p class="text-center max-w-3xl mx-auto text-lg text-gray-600 mb-12">
+          A goal without a plan is just a wish. Here is a strategic roadmap for
+          the highly ambitious role of a
+          <span class="font-bold text-accent">FinTech Innovator / Founder</span
+          >, outlining key milestones from learning to launch.
+        </p>
+        <div class="stat-card max-w-4xl mx-auto">
+          <ol class="relative border-l-4 border-accent space-y-10 pl-6">
+            <li class="ml-4">
+              <div
+                class="absolute w-6 h-6 bg-main rounded-full mt-1.5 -left-[14px] border-4 border-white"
+              ></div>
+              <h3 class="text-xl font-bold text-main text-left">
+                Phase 1: Foundational Learning
+              </h3>
+              <p class="text-left text-gray-600">
+                Complete certifications in Blockchain and advanced Financial
+                Modeling. Deep-dive into regulatory compliance (RegTech).
+              </p>
+            </li>
+            <li class="ml-4">
+              <div
+                class="absolute w-6 h-6 bg-main rounded-full mt-1.5 -left-[14px] border-4 border-white"
+              ></div>
+              <h3 class="text-xl font-bold text-main text-left">
+                Phase 2: Practical Experience
+              </h3>
+              <p class="text-left text-gray-600">
+                Build a prototype for a decentralized payment solution or a
+                robo-advisor. Participate in a FinTech hackathon to validate
+                ideas quickly.
+              </p>
+            </li>
+            <li class="ml-4">
+              <div
+                class="absolute w-6 h-6 bg-main rounded-full mt-1.5 -left-[14px] border-4 border-white"
+              ></div>
+              <h3 class="text-xl font-bold text-main text-left">
+                Phase 3: Networking & Validation
+              </h3>
+              <p class="text-left text-gray-600">
+                Join a FinTech-focused startup incubator. Actively engage with
+                VCs and angel investors to refine your business model and pitch.
+              </p>
+            </li>
+            <li class="ml-4">
+              <div
+                class="absolute w-6 h-6 bg-main rounded-full mt-1.5 -left-[14px] border-4 border-white"
+              ></div>
+              <h3 class="text-xl font-bold text-main text-left">
+                Goal: Secure Seed Funding
+              </h3>
+              <p class="text-left text-gray-600">
+                Within 1-3 years, secure seed funding based on a validated
+                Minimum Viable Product (MVP) and begin scaling operations.
+              </p>
+            </li>
+          </ol>
+        </div>
+      </section>
+    </main>
+
+    <footer class="text-center bg-main text-white py-8">
+      <p>Infographic Generated: Sunday, September 14, 2025 at 8:59 PM IST</p>
+      <p class="text-sm opacity-80">Location Context: Rewari, Haryana, India</p>
+    </footer>
+
+    <script>
+      const infographicData = {
+        pillars: {
+          labels: [
+            "Financial Modeling",
+            "ML Concepts",
+            "Business Strategy",
+            ["Systems", "Architecture"],
+            "Go-to-Market",
+            "Risk Management",
+          ],
+          datasets: [
+            {
+              label: "Technology",
+              data: [3, 7, 6, 9, 7, 5],
+              backgroundColor: "#00B4D8",
+            },
+            {
+              label: "CA Finance",
+              data: [10, 2, 7, 3, 4, 9],
+              backgroundColor: "#0077B6",
+            },
+            {
+              label: "AI Management",
+              data: [4, 9, 8, 6, 7, 7],
+              backgroundColor: "#90E0EF",
+            },
+            {
+              label: "MBA Entrepreneurship",
+              data: [6, 5, 10, 4, 9, 8],
+              backgroundColor: "#CAF0F8",
+            },
+          ],
+        },
+        careerPaths: {
+          fintechInnovator: {
+            title: "FinTech Innovator",
+            skills: {
+              "Financial Acumen": 9,
+              Entrepreneurship: 10,
+              "Tech Strategy": 8,
+              "AI Knowledge": 7,
+              Leadership: 9,
+            },
+            demand: 10,
+            salary: [150, 500],
+          },
+          aiStrategyConsultant: {
+            title: "AI Strategy Consultant",
+            skills: {
+              "Financial Acumen": 8,
+              Entrepreneurship: 6,
+              "Tech Strategy": 9,
+              "AI Knowledge": 9,
+              Leadership: 8,
+            },
+            demand: 9,
+            salary: [140, 250],
+          },
+          quantAnalyst: {
+            title: "Quantitative Analyst",
+            skills: {
+              "Financial Acumen": 9,
+              Entrepreneurship: 3,
+              "Tech Strategy": 7,
+              "AI Knowledge": 10,
+              Leadership: 5,
+            },
+            demand: 9,
+            salary: [160, 300],
+          },
+          vcTechAnalyst: {
+            title: "VC Tech Analyst",
+            skills: {
+              "Financial Acumen": 8,
+              Entrepreneurship: 8,
+              "Tech Strategy": 9,
+              "AI Knowledge": 6,
+              Leadership: 6,
+            },
+            demand: 7,
+            salary: [120, 200],
+          },
+          cfoStartup: {
+            title: "CFO for a Tech Startup",
+            skills: {
+              "Financial Acumen": 10,
+              Entrepreneurship: 9,
+              "Tech Strategy": 6,
+              "AI Knowledge": 4,
+              Leadership: 10,
+            },
+            demand: 8,
+            salary: [180, 350],
+          },
+        },
+      };
+
+      const chartDefaultOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: "bottom", labels: { color: "#1f2937" } },
+          tooltip: {
+            callbacks: {
+              title: function (tooltipItems) {
+                const item = tooltipItems[0];
+                let label = item.chart.data.labels[item.dataIndex];
+                if (Array.isArray(label)) {
+                  return label.join(" ");
+                }
+                return label;
+              },
+            },
+          },
+        },
+        scales: {
+          y: { ticks: { color: "#374151" }, grid: { color: "#e5e7eb" } },
+          x: { ticks: { color: "#374151" }, grid: { display: false } },
+        },
+      };
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const sections = document.querySelectorAll("section");
+        const navLinks = document.querySelectorAll(".nav-link");
+        let synergyRadarChart;
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                navLinks.forEach((link) => {
+                  link.classList.toggle(
+                    "active",
+                    link.getAttribute("href").substring(1) === entry.target.id
+                  );
+                });
+              }
+            });
+          },
+          { rootMargin: "-50% 0px -50% 0px" }
+        );
+        sections.forEach((section) => observer.observe(section));
+
+        new Chart(document.getElementById("pillarsChart"), {
+          type: "bar",
+          data: infographicData.pillars,
+          options: { ...chartDefaultOptions, indexAxis: "y" },
+        });
+
+        const demandData = Object.values(infographicData.careerPaths)
+          .map((c) => ({ title: c.title, demand: c.demand }))
+          .sort((a, b) => b.demand - a.demand);
+        new Chart(document.getElementById("demandChart"), {
+          type: "bar",
+          data: {
+            labels: demandData.map((d) => d.title),
+            datasets: [
+              {
+                label: "Demand Score (out of 10)",
+                data: demandData.map((d) => d.demand),
+                backgroundColor: "#0077B6",
+              },
+            ],
+          },
+          options: {
+            ...chartDefaultOptions,
+            indexAxis: "y",
+            plugins: { legend: { display: false } },
+          },
+        });
+
+        new Chart(document.getElementById("salaryChart"), {
+          type: "bar",
+          data: {
+            labels: Object.values(infographicData.careerPaths).map(
+              (c) => c.title
+            ),
+            datasets: [
+              {
+                label: "Salary Range (in thousands USD)",
+                data: Object.values(infographicData.careerPaths).map(
+                  (c) => c.salary
+                ),
+                backgroundColor: "#00B4D8",
+              },
+            ],
+          },
+          options: {
+            ...chartDefaultOptions,
+            indexAxis: "y",
+            plugins: { legend: { display: false } },
+          },
+        });
+
+        function createRadarChart() {
+          const ctx = document
+            .getElementById("synergyRadarChart")
+            .getContext("2d");
+          synergyRadarChart = new Chart(ctx, {
+            type: "radar",
+            data: { labels: [], datasets: [{ data: [] }] },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                r: {
+                  beginAtZero: true,
+                  max: 10,
+                  grid: { color: "#e5e7eb" },
+                  angleLines: { color: "#e5e7eb" },
+                  pointLabels: { font: { size: 12 }, color: "#374151" },
+                },
+              },
+              plugins: { legend: { display: false } },
+            },
+          });
+        }
+
+        function updateRadarChart(careerKey) {
+          const careerData = infographicData.careerPaths[careerKey];
+          document.getElementById("radar-chart-title").textContent =
+            careerData.title;
+          synergyRadarChart.data.labels = Object.keys(careerData.skills);
+          synergyRadarChart.data.datasets = [
+            {
+              label: "Required Skill Level",
+              data: Object.values(careerData.skills),
+              backgroundColor: "rgba(0, 180, 216, 0.2)",
+              borderColor: "rgba(0, 180, 216, 1)",
+              pointBackgroundColor: "rgba(0, 180, 216, 1)",
+              pointBorderColor: "#fff",
+            },
+          ];
+          synergyRadarChart.update();
+        }
+
+        const cardsContainer = document.getElementById(
+          "career-cards-container"
+        );
+        Object.entries(infographicData.careerPaths).forEach(
+          ([key, value], index) => {
+            const card = document.createElement("div");
+            card.className =
+              "career-card p-4 rounded-lg bg-white shadow-md cursor-pointer";
+            card.dataset.careerKey = key;
+            card.innerHTML = `<h4 class="font-bold text-lg text-main">${value.title}</h4><p class="text-sm text-gray-600">Blends finance, tech, and leadership.</p>`;
+            if (index === 0) card.classList.add("active");
+            cardsContainer.appendChild(card);
+          }
+        );
+
+        cardsContainer.addEventListener("click", (e) => {
+          const card = e.target.closest(".career-card");
+          if (card) {
+            cardsContainer
+              .querySelectorAll(".career-card")
+              .forEach((c) => c.classList.remove("active"));
+            card.classList.add("active");
+            updateRadarChart(card.dataset.careerKey);
+          }
+        });
+
+        createRadarChart();
+        updateRadarChart("fintechInnovator");
+      });
+    </script>
+  </body>
+</html>

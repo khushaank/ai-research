@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ikigai: Career Exploration Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Chosen Palette: Calm Neutrals -->
+    <!-- Application Structure Plan: The application is a single-page narrative dashboard guiding the user from self-reflection to action. It begins with the Ikigai concept, defines the user's Core Disciplines via tabs, then presents a Synergy Dashboard where a dropdown selection updates a radar chart, key stats, AND a new 'Strategic Action Plan' section. This final section provides a tailored roadmap for the selected career. This integrated structure ensures that as a user explores a potential career, they immediately see the skills required AND the steps to acquire them, creating a seamless and highly practical user journey. -->
+    <!-- Visualization & Content Choices: 
+        - Ikigai Framework: Goal(Inform) -> HTML/CSS 4-circle diagram -> Hover interaction -> Visually intuitive, lightweight.
+        - Core Disciplines: Goal(Organize) -> Tabbed interface -> Click to reveal -> Saves space.
+        - Career Path Skill Mix: Goal(Compare) -> Radar Chart -> Dropdown selection updates chart -> Excellent for comparing skill levels for a single role. (Chart.js/Canvas)
+        - Market Data: Goal(Inform) -> Dynamic Text Stats -> Updates with dropdown -> Clear, high-impact data points.
+        - Strategic Action Plan: Goal(Organize) -> HTML/CSS Stepper/Timeline -> Updates with dropdown -> Clearly visualizes a sequence of actionable steps, superior to a simple list. No SVG/Mermaid used.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f8fafc;
+        color: #1f2937;
+      }
+      .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+        height: 320px;
+        max-height: 400px;
+      }
+      @media (min-width: 768px) {
+        .chart-container {
+          height: 400px;
+        }
+      }
+      .tab-active {
+        border-color: #3b82f6;
+        color: #3b82f6;
+        font-weight: 600;
+      }
+      .card {
+        background-color: white;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+      }
+      .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+          0 4px 6px -2px rgb(0 0 0 / 0.1);
+      }
+      .ikigai-circle {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 1rem;
+        font-weight: 600;
+        color: white;
+        position: absolute;
+        opacity: 0.85;
+        transition: all 0.3s ease;
+      }
+      .ikigai-label {
+        position: absolute;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        opacity: 0.9;
+      }
+      .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body class="antialiased">
+    <div class="container mx-auto px-4 py-8 sm:py-12 lg:px-8">
+      <header class="text-center mb-12">
+        <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+          Find Your Career Ikigai
+        </h1>
+        <p class="mt-4 max-w-3xl mx-auto text-lg text-gray-600">
+          An interactive dashboard exploring the intersection of your passions
+          and skills in Technology, Finance, AI, and Entrepreneurship.
+        </p>
+      </header>
+
+      <section id="ikigai" class="mb-16">
+        <div class="card p-6 md:p-8">
+          <h2 class="text-2xl font-bold text-center mb-2">
+            The Ikigai Framework
+          </h2>
+          <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto">
+            Ikigai is a Japanese concept that means "a reason for being." It's
+            found at the intersection of what you love, what you're good at,
+            what the world needs, and what you can be paid for.
+          </p>
+          <div class="relative h-96 w-full flex items-center justify-center">
+            <div
+              class="ikigai-circle"
+              style="
+                background-color: #3b82f6;
+                top: 0;
+                left: 50%;
+                transform: translateX(-70%);
+              "
+            >
+              What you LOVE
+            </div>
+            <div
+              class="ikigai-circle"
+              style="
+                background-color: #10b981;
+                top: 0;
+                right: 50%;
+                transform: translateX(70%);
+              "
+            >
+              What you're GOOD AT
+            </div>
+            <div
+              class="ikigai-circle"
+              style="
+                background-color: #f97316;
+                bottom: 0;
+                left: 50%;
+                transform: translateX(-70%);
+              "
+            >
+              What the world NEEDS
+            </div>
+            <div
+              class="ikigai-circle"
+              style="
+                background-color: #8b5cf6;
+                bottom: 0;
+                right: 50%;
+                transform: translateX(70%);
+              "
+            >
+              What you can be PAID FOR
+            </div>
+            <div class="absolute text-center">
+              <div
+                class="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center"
+              >
+                <span class="text-white text-3xl font-bold">IKIGAI</span>
+              </div>
+            </div>
+            <div
+              class="ikigai-label text-blue-600"
+              style="top: 28%; left: 50%; transform: translateX(-120%)"
+            >
+              PASSION
+            </div>
+            <div
+              class="ikigai-label text-emerald-600"
+              style="top: 28%; right: 50%; transform: translateX(120%)"
+            >
+              PROFESSION
+            </div>
+            <div
+              class="ikigai-label text-orange-600"
+              style="bottom: 28%; left: 50%; transform: translateX(-120%)"
+            >
+              MISSION
+            </div>
+            <div
+              class="ikigai-label text-violet-600"
+              style="bottom: 28%; right: 50%; transform: translateX(120%)"
+            >
+              VOCATION
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="disciplines" class="mb-16">
+        <h2 class="text-3xl font-bold text-center mb-8">
+          Your Core Disciplines
+        </h2>
+        <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto">
+          Your interests form a powerful foundation. Click on each discipline
+          below to explore its core concepts and the essential skills required
+          to excel. Understanding these fundamentals is the first step toward
+          finding their powerful synergies.
+        </p>
+        <div class="card p-6 md:p-8">
+          <div class="border-b border-gray-200 mb-6">
+            <nav class="-mb-px flex space-x-4 sm:space-x-8" aria-label="Tabs">
+              <button
+                id="tab-tech"
+                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm sm:text-base border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              >
+                Technology
+              </button>
+              <button
+                id="tab-finance"
+                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm sm:text-base border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              >
+                CA Finance
+              </button>
+              <button
+                id="tab-ai"
+                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm sm:text-base border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              >
+                AI Management
+              </button>
+              <button
+                id="tab-mba"
+                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm sm:text-base border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              >
+                MBA Entrepreneurship
+              </button>
+            </nav>
+          </div>
+          <div id="tab-content"></div>
+        </div>
+      </section>
+
+      <section id="synergy-dashboard" class="mb-16">
+        <h2 class="text-3xl font-bold text-center mb-8">
+          The Synergy Dashboard & Action Plan
+        </h2>
+        <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto">
+          This is where your interests converge into actionable careers. Select
+          a path from the dropdown to see a dynamic analysis of its skill
+          profile, market relevance, and a tailored strategic plan to help you
+          get there.
+        </p>
+        <div class="card p-6 md:p-8">
+          <div
+            class="flex flex-col md:flex-row md:items-center md:justify-between mb-8"
+          >
+            <label
+              for="career-select"
+              class="block text-lg font-semibold text-gray-800 mb-2 md:mb-0"
+              >Explore Potential Career Paths:</label
+            >
+            <select
+              id="career-select"
+              class="w-full md:w-auto mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md shadow-sm"
+            >
+              <option value="fintechInnovator">
+                FinTech Innovator / Founder
+              </option>
+              <option value="aiStrategyConsultant">
+                AI Strategy Consultant (Finance)
+              </option>
+              <option value="quantAnalyst">
+                Quantitative Analyst (AI-driven)
+              </option>
+              <option value="vcTechAnalyst">
+                Venture Capital Tech Analyst
+              </option>
+              <option value="cfoStartup">CFO for a Tech Startup</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-12">
+            <div>
+              <h3
+                id="career-title"
+                class="text-2xl font-bold text-gray-900 mb-2"
+              ></h3>
+              <p id="career-description" class="text-gray-600 mb-6"></p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-orange-50 p-4 rounded-lg">
+                  <h4 class="font-semibold text-orange-800">
+                    Market Demand & Impact
+                  </h4>
+                  <p
+                    id="career-demand"
+                    class="text-2xl font-bold text-orange-900"
+                  ></p>
+                </div>
+                <div class="bg-violet-50 p-4 rounded-lg">
+                  <h4 class="font-semibold text-violet-800">
+                    Estimated Annual Salary
+                  </h4>
+                  <p
+                    id="career-salary"
+                    class="text-2xl font-bold text-violet-900"
+                  ></p>
+                </div>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="skillsRadarChart"></canvas>
+            </div>
+          </div>
+
+          <div class="border-t border-gray-200 pt-8">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+              Your Strategic Action Plan
+            </h3>
+            <div id="action-plan-content" class="max-w-4xl mx-auto"></div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="text-center mt-16">
+        <p class="text-gray-500">
+          This dashboard was generated on September 14, 2025. Current time is
+          8:57 PM IST in Rewari, Haryana.
+        </p>
+      </footer>
+    </div>
+
+    <script>
+      const reportData = {
+        disciplines: {
+          tech: {
+            title: "Technology",
+            content:
+              "Technology is the application of scientific knowledge for practical purposes. It encompasses software development, data science, cybersecurity, and cloud computing.",
+            skills: [
+              "Software Development",
+              "Data Structures & Algorithms",
+              "Cloud Computing (AWS, Azure)",
+              "Cybersecurity Principles",
+              "Systems Architecture",
+            ],
+          },
+          finance: {
+            title: "CA Finance",
+            content:
+              "Chartered Accountancy (CA) in Finance involves expertise in financial accounting, reporting, auditing, taxation, and corporate finance, forming the bedrock for sound financial management.",
+            skills: [
+              "Financial Modeling",
+              "Corporate Valuation",
+              "Risk Management",
+              "Taxation & Compliance",
+              "Mergers & Acquisitions",
+            ],
+          },
+          ai: {
+            title: "AI Management",
+            content:
+              "AI Management bridges technical AI development and business strategy. It involves understanding AI/ML capabilities, identifying use-cases, and managing implementation and ethics.",
+            skills: [
+              "Machine Learning Concepts",
+              "Data Strategy & Governance",
+              "AI Ethics & Bias Mitigation",
+              "Product Management",
+              "Project Leadership",
+            ],
+          },
+          mba: {
+            title: "MBA Entrepreneurship",
+            content:
+              "An MBA in Entrepreneurship equips leaders to build, manage, and scale a business. It covers strategy, marketing, operations, fundraising, and leadership in a startup context.",
+            skills: [
+              "Business Model Canvas",
+              "Go-to-Market Strategy",
+              "Venture Funding",
+              "Team Leadership & Culture",
+              "Agile Operations",
+            ],
+          },
+        },
+        careerPaths: {
+          fintechInnovator: {
+            title: "FinTech Innovator / Founder",
+            description:
+              "Creates new technology to improve and automate financial services, combining deep financial knowledge with cutting-edge tech and an entrepreneurial spirit.",
+            demand: "Very High Growth",
+            salary: "$150k - $500k+",
+            skills: {
+              "Financial Acumen": 9,
+              Entrepreneurship: 10,
+              "Tech Strategy": 8,
+              "AI/ML Knowledge": 7,
+              Leadership: 9,
+            },
+            actionPlan: [
+              {
+                stage: "Foundational Learning",
+                detail:
+                  "Complete certifications in Blockchain and advanced Financial Modeling. Deep-dive into regulatory compliance (RegTech).",
+                icon: "🎓",
+              },
+              {
+                stage: "Practical Experience",
+                detail:
+                  "Build a prototype for a decentralized payment solution or a robo-advisor. Participate in a FinTech hackathon.",
+                icon: "💡",
+              },
+              {
+                stage: "Networking",
+                detail:
+                  "Join FinTech-focused startup incubators like Y Combinator or 500 Startups. Actively engage with VCs and angel investors.",
+                icon: "🤝",
+              },
+              {
+                stage: "1-3 Year Goal",
+                detail:
+                  "Secure seed funding based on a validated MVP (Minimum Viable Product) and begin scaling operations.",
+                icon: "🚀",
+              },
+            ],
+          },
+          aiStrategyConsultant: {
+            title: "AI Strategy Consultant (Finance)",
+            description:
+              "Advises financial institutions on leveraging AI to improve efficiency, create new products, and manage risk by creating actionable roadmaps.",
+            demand: "High Growth",
+            salary: "$140k - $250k",
+            skills: {
+              "Financial Acumen": 8,
+              Entrepreneurship: 6,
+              "Tech Strategy": 9,
+              "AI/ML Knowledge": 9,
+              Leadership: 8,
+            },
+            actionPlan: [
+              {
+                stage: "Foundational Learning",
+                detail:
+                  "Master core ML concepts and take business-focused AI strategy courses (e.g., from MIT Sloan or INSEAD).",
+                icon: "🎓",
+              },
+              {
+                stage: "Practical Experience",
+                detail:
+                  "Work on a pro-bono consulting project for a non-profit to apply AI strategy. Publish a whitepaper on AI in banking.",
+                icon: "💡",
+              },
+              {
+                stage: "Networking",
+                detail:
+                  "Attend major AI and Finance conferences (e.g., Money 20/20). Connect with partners at top consulting firms.",
+                icon: "🤝",
+              },
+              {
+                stage: "1-3 Year Goal",
+                detail:
+                  "Lead a significant AI transformation project for a major financial client, delivering measurable ROI.",
+                icon: "🚀",
+              },
+            ],
+          },
+          quantAnalyst: {
+            title: "Quantitative Analyst (AI-driven)",
+            description:
+              "Develops and implements complex mathematical models, powered by machine learning, for financial markets, focusing on algorithmic trading and risk.",
+            demand: "High Growth",
+            salary: "$160k - $300k",
+            skills: {
+              "Financial Acumen": 9,
+              Entrepreneurship: 3,
+              "Tech Strategy": 7,
+              "AI/ML Knowledge": 10,
+              Leadership: 5,
+            },
+            actionPlan: [
+              {
+                stage: "Foundational Learning",
+                detail:
+                  "Pursue an advanced degree (M.S. or Ph.D.) in Financial Engineering, Computer Science, or a related quantitative field.",
+                icon: "🎓",
+              },
+              {
+                stage: "Practical Experience",
+                detail:
+                  "Contribute to open-source quantitative finance libraries (e.g., QuantLib, Zipline). Compete in Kaggle competitions focused on market prediction.",
+                icon: "💡",
+              },
+              {
+                stage: "Networking",
+                detail:
+                  "Join professional organizations like the IAFE. Attend quant-specific conferences and build a strong academic and professional network.",
+                icon: "🤝",
+              },
+              {
+                stage: "1-3 Year Goal",
+                detail:
+                  "Develop and deploy a profitable trading algorithm on a live market or build a novel risk model used by your firm.",
+                icon: "🚀",
+              },
+            ],
+          },
+          vcTechAnalyst: {
+            title: "Venture Capital Tech Analyst",
+            description:
+              "Sources, evaluates, and performs due diligence on early-stage technology startups for investment, requiring a blend of financial analysis and tech trend spotting.",
+            demand: "Medium Growth",
+            salary: "$120k - $200k",
+            skills: {
+              "Financial Acumen": 8,
+              Entrepreneurship: 8,
+              "Tech Strategy": 9,
+              "AI/ML Knowledge": 6,
+              Leadership: 6,
+            },
+            actionPlan: [
+              {
+                stage: "Foundational Learning",
+                detail:
+                  "Become an expert in financial valuation for pre-revenue startups. Develop a thesis on an emerging tech sector (e.g., Generative AI, Quantum Computing).",
+                icon: "🎓",
+              },
+              {
+                stage: "Practical Experience",
+                detail:
+                  "Work at a fast-growing startup to understand operations from the inside. Start a blog or newsletter analyzing tech trends and startups.",
+                icon: "💡",
+              },
+              {
+                stage: "Networking",
+                detail:
+                  "Build relationships with founders, angel investors, and other VCs. Offer to help startups with financial models or market research for free.",
+                icon: "🤝",
+              },
+              {
+                stage: "1-3 Year Goal",
+                detail:
+                  "Source a deal that gets funded by your firm, demonstrating your ability to identify high-potential companies.",
+                icon: "🚀",
+              },
+            ],
+          },
+          cfoStartup: {
+            title: "CFO for a Tech Startup",
+            description:
+              "Leads the financial operations and strategy of a growing tech company, including fundraising, investor relations, FP&A, and scaling operations.",
+            demand: "High Growth",
+            salary: "$180k - $350k+",
+            skills: {
+              "Financial Acumen": 10,
+              Entrepreneurship: 9,
+              "Tech Strategy": 6,
+              "AI/ML Knowledge": 4,
+              Leadership: 10,
+            },
+            actionPlan: [
+              {
+                stage: "Foundational Learning",
+                detail:
+                  "Go beyond CA basics to master SaaS metrics, fundraising deal structures (equity/debt), and cap table management.",
+                icon: "🎓",
+              },
+              {
+                stage: "Practical Experience",
+                detail:
+                  "Take a Director of Finance or VP of Finance role at a Series A/B startup to gain hands-on scaling experience.",
+                icon: "💡",
+              },
+              {
+                stage: "Networking",
+                detail:
+                  "Build a strong network of startup lawyers, bankers, and VCs who will be crucial during fundraising rounds.",
+                icon: "🤝",
+              },
+              {
+                stage: "1-3 Year Goal",
+                detail:
+                  "Successfully lead a significant funding round (e.g., Series B or C) and implement scalable financial systems for the company.",
+                icon: "🚀",
+              },
+            ],
+          },
+        },
+      };
+
+      let skillsRadarChart;
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const tabContainer = document.querySelector("#disciplines nav");
+        const tabContentContainer = document.getElementById("tab-content");
+        const careerSelect = document.getElementById("career-select");
+        const actionPlanContainer = document.getElementById(
+          "action-plan-content"
+        );
+
+        function renderTabContent(disciplineKey) {
+          const discipline = reportData.disciplines[disciplineKey];
+          let skillsHtml = discipline.skills
+            .map(
+              (skill) =>
+                `<li class="flex items-center"><span class="mr-2 text-blue-500">&#10003;</span>${skill}</li>`
+            )
+            .join("");
+
+          tabContentContainer.innerHTML = `<div class="fade-in"><h3 class="text-xl font-bold text-gray-800 mb-2">${discipline.title}</h3><p class="text-gray-600 mb-4">${discipline.content}</p><h4 class="font-semibold text-gray-700 mb-2">Key Skills:</h4><ul class="space-y-1 text-gray-600">${skillsHtml}</ul></div>`;
+        }
+
+        function setActiveTab(tabId) {
+          tabContainer.querySelectorAll("button").forEach((tab) => {
+            tab.classList.toggle("tab-active", tab.id === tabId);
+            tab.classList.toggle("text-gray-500", tab.id !== tabId);
+            tab.classList.toggle("border-transparent", tab.id !== tabId);
+          });
+          renderTabContent(tabId.split("-")[1]);
+        }
+
+        tabContainer.addEventListener("click", (e) => {
+          if (e.target.tagName === "BUTTON") setActiveTab(e.target.id);
+        });
+
+        function createRadarChart() {
+          const ctx = document
+            .getElementById("skillsRadarChart")
+            .getContext("2d");
+          skillsRadarChart = new Chart(ctx, {
+            type: "radar",
+            data: {
+              labels: [],
+              datasets: [
+                {
+                  label: "Required Skill Level",
+                  data: [],
+                  backgroundColor: "rgba(59, 130, 246, 0.2)",
+                  borderColor: "rgba(59, 130, 246, 1)",
+                  pointBackgroundColor: "rgba(59, 130, 246, 1)",
+                  pointBorderColor: "#fff",
+                  pointHoverBackgroundColor: "#fff",
+                  pointHoverBorderColor: "rgba(59, 130, 246, 1)",
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                r: {
+                  beginAtZero: true,
+                  max: 10,
+                  grid: { color: "rgba(0, 0, 0, 0.05)" },
+                  angleLines: { color: "rgba(0, 0, 0, 0.05)" },
+                  pointLabels: { font: { size: 12 } },
+                },
+              },
+              plugins: { legend: { display: false } },
+            },
+          });
+        }
+
+        function updateDashboard(careerKey) {
+          const careerData = reportData.careerPaths[careerKey];
+
+          const elementsToUpdate = {
+            "career-title": careerData.title,
+            "career-description": careerData.description,
+            "career-demand": careerData.demand,
+            "career-salary": careerData.salary,
+          };
+
+          Object.entries(elementsToUpdate).forEach(([id, text]) => {
+            const el = document.getElementById(id);
+            el.classList.remove("fade-in");
+            void el.offsetWidth;
+            el.textContent = text;
+            el.classList.add("fade-in");
+          });
+
+          skillsRadarChart.data.labels = Object.keys(careerData.skills);
+          skillsRadarChart.data.datasets[0].data = Object.values(
+            careerData.skills
+          );
+          skillsRadarChart.update();
+
+          let actionPlanHtml = '<ol class="relative border-l border-gray-200">';
+          careerData.actionPlan.forEach((item) => {
+            actionPlanHtml += `
+                    <li class="mb-10 ml-6">            
+                        <span class="absolute flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full -left-4 ring-8 ring-white">
+                            ${item.icon}
+                        </span>
+                        <h4 class="flex items-center mb-1 text-lg font-semibold text-gray-900">${item.stage}</h4>
+                        <p class="block mb-2 text-sm font-normal leading-none text-gray-500">${item.detail}</p>
+                    </li>`;
+          });
+          actionPlanHtml += "</ol>";
+          actionPlanContainer.innerHTML = `<div class="fade-in">${actionPlanHtml}</div>`;
+        }
+
+        careerSelect.addEventListener("change", (e) =>
+          updateDashboard(e.target.value)
+        );
+
+        setActiveTab("tab-tech");
+        createRadarChart();
+        updateDashboard(careerSelect.value);
+      });
+    </script>
+  </body>
+</html>

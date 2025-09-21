@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Holistic CA Student Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Chosen Palette: Warm Neutrals (Slate, Beige, Amber Accent) -->
+    <!-- Application Structure Plan: A single-page interactive dashboard designed for self-assessment and actionable guidance. The core of the application is a radar chart that visualizes the user's self-rated balance across six key life areas they feel are missing from their online CA preparation. This provides immediate, personalized visual feedback. Below this assessment tool, a dynamic "Action Plan" section offers tailored, practical solutions for each area, which are revealed on-demand by clicking on the corresponding category. This structure was chosen to first engage the user with a personal assessment ('the problem') and then provide clear, focused solutions ('what to do'), preventing information overload and promoting a proactive, step-by-step user flow. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: User's self-assessment across 6 life areas (Peer Network, Extracurricular, etc.). Goal: Compare personal standing in multiple areas simultaneously. Viz/Presentation Method: Radar Chart (Chart.js on a Canvas element). Interaction: The user adjusts sliders (1-10) for each area, and the radar chart updates in real-time. Justification: A radar chart is the ideal tool for comparing multiple variables against a central point, providing an instant "shape" of one's life balance. The real-time updates make it a highly personal and engaging diagnostic tool.
+        - Report Info: The six categories of missed experiences. Goal: Organize and inform. Viz/Presentation Method: Thematic cards (structured HTML with Tailwind CSS). Interaction: Each card contains a description and a button to reveal actionable solutions. Justification: Cards effectively modularize the information, making it easy for the user to digest each concept individually before diving into solutions.
+        - Report Info: The user's need for actionable advice to compensate for the lack of college experience. Goal: Provide clear, targeted solutions. Viz/Presentation Method: A dynamically updated text block (HTML populated by JavaScript). Interaction: Clicking a button on any of the six category cards populates this section with specific, relevant advice. Justification: This on-demand approach avoids overwhelming the user with a long wall of text and allows them to focus on improving one area at a time.
+        - Library/Method: Chart.js for the radar chart, Vanilla JS for state management and DOM manipulation, Tailwind CSS for styling.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f5f5f4; /* stone-100 */
+      }
+      .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        height: 300px;
+        max-height: 400px;
+      }
+      @media (min-width: 768px) {
+        .chart-container {
+          height: 400px;
+        }
+      }
+      .slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        background: #d97706; /* amber-600 */
+        cursor: pointer;
+        border-radius: 50%;
+        border: 2px solid white;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+      }
+      .slider-track {
+        width: 100%;
+        height: 8px;
+        cursor: pointer;
+        background: #e7e5e4; /* stone-200 */
+        border-radius: 9999px;
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        background: #d97706; /* amber-600 */
+        cursor: pointer;
+        border-radius: 50%;
+        margin-top: -6px; /* Center thumb on track */
+        border: 2px solid white;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+      }
+      input[type="range"]::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        background: #d97706; /* amber-600 */
+        cursor: pointer;
+        border-radius: 50%;
+        border: 2px solid white;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+      }
+    </style>
+  </head>
+  <body class="text-slate-800">
+    <div class="container mx-auto p-4 md:p-8">
+      <header class="text-center mb-8 md:mb-12">
+        <h1 class="text-3xl md:text-4xl font-bold text-slate-900">
+          Bridging the Gap: Your Holistic CA Journey
+        </h1>
+        <p class="mt-2 text-lg text-slate-600 max-w-3xl mx-auto">
+          Studying online for the CA exam is a focused path. This dashboard
+          helps you identify and build the valuable life experiences you might
+          be missing from a traditional college setting.
+        </p>
+      </header>
+
+      <main>
+        <section
+          id="assessment"
+          class="bg-white p-6 md:p-8 rounded-2xl shadow-lg mb-8 md:mb-12"
+        >
+          <h2 class="text-2xl font-bold text-center mb-2">
+            Your Life Balance Scorecard
+          </h2>
+          <p class="text-center text-slate-600 mb-6">
+            Rate your current engagement in each area from 1 (Low) to 10 (High)
+            to see a visual snapshot of your life outside of studies. As you
+            adjust the sliders, the chart will update in real time.
+          </p>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            <div class="chart-container">
+              <canvas id="lifeBalanceChart"></canvas>
+            </div>
+            <div id="sliders" class="space-y-5"></div>
+          </div>
+        </section>
+
+        <section id="action-plan-container">
+          <h2 class="text-2xl font-bold text-center mb-6">
+            Explore Areas & Build Your Action Plan
+          </h2>
+          <div
+            id="cards-container"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
+          ></div>
+        </section>
+
+        <section
+          id="solutions"
+          class="bg-white p-6 md:p-8 rounded-2xl shadow-lg mt-8 hidden"
+        >
+          <div class="flex justify-between items-start">
+            <h3
+              id="solution-title"
+              class="text-2xl font-bold text-amber-700 mb-4"
+            >
+              Action Plan
+            </h3>
+            <button
+              id="close-solutions"
+              class="text-slate-500 hover:text-slate-800"
+            >
+              <span class="text-2xl font-bold">&times;</span>
+            </button>
+          </div>
+          <div
+            id="solution-content"
+            class="prose max-w-none prose-ul:list-disc prose-ul:pl-5 prose-li:mb-2 text-slate-700"
+          ></div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const categories = [
+        {
+          id: "peer-network",
+          name: "Peer Network",
+          description:
+            "Builds camaraderie, healthy competition, and lasting personal and professional connections.",
+          value: 5,
+        },
+        {
+          id: "extracurricular",
+          name: "Extracurricular Growth",
+          description:
+            "Shapes personality, showcases talents, and provides leadership and teamwork practice.",
+          value: 5,
+        },
+        {
+          id: "social-development",
+          name: "Social Development",
+          description:
+            "Exposure to diverse people, developing social confidence and communication skills.",
+          value: 5,
+        },
+        {
+          id: "career-exposure",
+          name: "Career Exposure",
+          description:
+            "Connect with industry professionals, alumni networks, and discover multiple career paths.",
+          value: 5,
+        },
+        {
+          id: "soft-skills",
+          name: "Soft Skills",
+          description:
+            "Naturally builds public speaking, time management, negotiation, and leadership abilities.",
+          value: 5,
+        },
+        {
+          id: "independence",
+          name: "Independence & Lifestyle",
+          description:
+            "Managing routines, balancing responsibilities, and creating life-long memories.",
+          value: 5,
+        },
+      ];
+
+      const solutions = {
+        "peer-network": `
+                <h4>Actionable Steps:</h4>
+                <ul>
+                    <li><strong>Join Online CA Forums:</strong> Actively participate in forums like CAclubindia or student groups on Telegram and LinkedIn. Don't just read; ask questions and share your insights.</li>
+                    <li><strong>ICAI Chapter Meetings:</strong> Attend local ICAI chapter events, seminars, and workshops. This is the best way to meet peers and seniors in person.</li>
+                    <li><strong>Form a Virtual Study Group:</strong> Find 3-4 serious students from your online coaching or forums. Use video calls for doubt-solving sessions and to keep each other motivated.</li>
+                    <li><strong>Connect on LinkedIn:</strong> Follow CA professionals and connect with fellow students. Share your learning journey and comment thoughtfully on others' posts.</li>
+                </ul>`,
+        extracurricular: `
+                <h4>Actionable Steps:</h4>
+                <ul>
+                    <li><strong>Volunteer for a Cause:</strong> Dedicate a few hours a month to an NGO. This builds character, empathy, and organizational skills.</li>
+                    <li><strong>Join Toastmasters:</strong> This is an excellent platform to formally practice public speaking and leadership in a supportive environment.</li>
+                    <li><strong>Start a Blog or LinkedIn Newsletter:</strong> Write about complex CA topics in simple terms. This showcases your expertise and improves written communication.</li>
+                    <li><strong>Participate in Online Competitions:</strong> Look for business case studies, financial modeling competitions, or quizzes hosted online.</li>
+                </ul>`,
+        "social-development": `
+                <h4>Actionable Steps:</h4>
+                <ul>
+                    <li><strong>Pick Up a Hobby with a Group:</strong> Join a local sports club, a book club, a trekking group, or a dance class. Interacting with people outside the CA field broadens your perspective.</li>
+                    <li><strong>Attend Local Events:</strong> Use platforms like Meetup or local event listings to find gatherings related to your interests, be it technology, art, or business.</li>
+                    <li><strong>Travel Solo (Safely):</strong> Plan short, solo trips to nearby cities. It pushes you out of your comfort zone and forces you to interact with new people.</li>
+                    <li><strong>Practice Active Listening:</strong> In every conversation, focus on understanding the other person's perspective rather than just waiting for your turn to speak.</li>
+                </ul>`,
+        "career-exposure": `
+                <h4>Actionable Steps:</h4>
+                <ul>
+                    <li><strong>Attend Industry Webinars:</strong> Many companies and industry bodies host free webinars. These are great for understanding current trends beyond your syllabus.</li>
+                    <li><strong>Informational Interviews:</strong> Reach out to CAs on LinkedIn who are 5-10 years senior to you. Politely ask for 15 minutes of their time to learn about their career journey. Most are happy to help.</li>
+                    <li><strong>Read Business News Avidly:</strong> Go beyond textbooks. Follow publications like The Economic Times, Mint, or Livemint to understand how concepts apply in the real world.</li>
+                    <li><strong>Explore Internships:</strong> Even a short-term, remote internship during a break can provide immense practical exposure and a valuable point on your resume.</li>
+                </ul>`,
+        "soft-skills": `
+                <h4>Actionable Steps:</h4>
+                <ul>
+                    <li><strong>Explain Concepts to a Non-Finance Person:</strong> Try to explain a complex accounting standard or tax law to a family member or friend. This hones your ability to simplify and communicate effectively.</li>
+                    <li><strong>Use Time Management Tools:</strong> Use apps like Trello, Notion, or even a simple calendar to plan your study schedule, breaks, and other activities. Stick to the plan.</li>
+                    <li><strong>Negotiate in Daily Life:</strong> Practice small, friendly negotiations in daily life, for example, at a local market. It builds confidence for bigger professional discussions.</li>
+                    <li><strong>Lead Your Study Group:</strong> Take initiative in your virtual study group to set the agenda, moderate discussions, and ensure everyone participates.</li>
+                </ul>`,
+        independence: `
+                <h4>Actionable Steps:</h4>
+                <ul>
+                    <li><strong>Take Ownership of Your Schedule:</strong> Create and commit to a daily routine that balances study, health, and leisure, without needing external reminders.</li>
+                    <li><strong>Manage Your Finances:</strong> Create a personal budget, track your expenses, and learn about basic investing. This is a crucial life skill, especially for a future CA.</li>
+                    <li><strong>Learn a Practical Skill:</strong> Use YouTube to learn basic cooking, home repairs, or anything else you're curious about. It builds self-reliance.</li>
+                    <li><strong>Schedule "Unstructured Fun":</strong> Deliberately block out time in your week for activities with no specific goal – meeting friends, watching a movie, or just relaxing. This is vital for preventing burnout.</li>
+                </ul>`,
+      };
+
+      let lifeBalanceChart;
+
+      const setupUI = () => {
+        const slidersContainer = document.getElementById("sliders");
+        const cardsContainer = document.getElementById("cards-container");
+
+        categories.forEach((cat) => {
+          const sliderHTML = `
+                    <div class="w-full">
+                        <div class="flex justify-between items-center mb-1">
+                            <label for="${cat.id}-slider" class="font-medium text-slate-700">${cat.name}</label>
+                            <span id="${cat.id}-value" class="font-bold text-amber-600 text-lg w-8 text-center">${cat.value}</span>
+                        </div>
+                        <input type="range" id="${cat.id}-slider" min="1" max="10" value="${cat.value}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-track">
+                    </div>
+                `;
+          slidersContainer.innerHTML += sliderHTML;
+
+          const cardHTML = `
+                    <div class="bg-stone-50 border border-stone-200 p-6 rounded-xl flex flex-col justify-between hover:shadow-md transition-shadow">
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-800">${cat.name}</h3>
+                            <p class="text-slate-600 mt-2 text-sm">${cat.description}</p>
+                        </div>
+                        <button data-category="${cat.id}" class="show-solution-btn mt-4 bg-amber-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-amber-700 transition-colors w-full">
+                            View Action Plan
+                        </button>
+                    </div>
+                `;
+          cardsContainer.innerHTML += cardHTML;
+        });
+      };
+
+      const setupChart = () => {
+        const ctx = document
+          .getElementById("lifeBalanceChart")
+          .getContext("2d");
+        lifeBalanceChart = new Chart(ctx, {
+          type: "radar",
+          data: {
+            labels: categories.map((c) => c.name),
+            datasets: [
+              {
+                label: "Your Score",
+                data: categories.map((c) => c.value),
+                backgroundColor:
+                  "rgba(217, 119, 6, 0.2)" /* amber-600 with opacity */,
+                borderColor: "rgba(217, 119, 6, 1)" /* amber-600 */,
+                borderWidth: 2,
+                pointBackgroundColor: "rgba(217, 119, 6, 1)",
+                pointBorderColor: "#fff",
+                pointHoverBackgroundColor: "#fff",
+                pointHoverBorderColor: "rgba(217, 119, 6, 1)",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              r: {
+                angleLines: {
+                  color: "#d6d3d1", // stone-300
+                },
+                grid: {
+                  color: "#e7e5e4", // stone-200
+                },
+                pointLabels: {
+                  font: {
+                    size: 12,
+                    weight: "500",
+                  },
+                  color: "#475569", // slate-600
+                },
+                ticks: {
+                  backdropColor: "rgba(255, 255, 255, 0.75)",
+                  color: "#64748b", // slate-500
+                  stepSize: 2,
+                },
+                min: 0,
+                max: 10,
+              },
+            },
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+          },
+        });
+      };
+
+      const updateChart = () => {
+        const newData = categories.map((cat) => {
+          const slider = document.getElementById(`${cat.id}-slider`);
+          const valueSpan = document.getElementById(`${cat.id}-value`);
+          valueSpan.textContent = slider.value;
+          return slider.value;
+        });
+        lifeBalanceChart.data.datasets[0].data = newData;
+        lifeBalanceChart.update();
+      };
+
+      const showSolutions = (categoryId) => {
+        const category = categories.find((c) => c.id === categoryId);
+        const solutionsContainer = document.getElementById("solutions");
+        const solutionTitle = document.getElementById("solution-title");
+        const solutionContent = document.getElementById("solution-content");
+
+        solutionTitle.textContent = `Action Plan: ${category.name}`;
+        solutionContent.innerHTML = solutions[categoryId];
+
+        solutionsContainer.classList.remove("hidden");
+        solutionsContainer.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      };
+
+      const addEventListeners = () => {
+        categories.forEach((cat) => {
+          document
+            .getElementById(`${cat.id}-slider`)
+            .addEventListener("input", updateChart);
+        });
+
+        document.querySelectorAll(".show-solution-btn").forEach((button) => {
+          button.addEventListener("click", (e) => {
+            showSolutions(e.target.dataset.category);
+          });
+        });
+
+        document
+          .getElementById("close-solutions")
+          .addEventListener("click", () => {
+            document.getElementById("solutions").classList.add("hidden");
+          });
+      };
+
+      document.addEventListener("DOMContentLoaded", () => {
+        setupUI();
+        setupChart();
+        addEventListeners();
+      });
+    </script>
+  </body>
+</html>
